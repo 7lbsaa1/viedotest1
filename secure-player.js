@@ -1,3 +1,4 @@
+// حماية من الفحص والأزرار الجانبية
 window['addEventListener']('keydown', function (_0xkb) {
     if (_0xkb['keyCode'] === 0x7B || 
         (_0xkb['ctrlKey'] && _0xkb['shiftKey'] && (_0xkb['keyCode'] === 0x49 || _0xkb['keyCode'] === 0x4A)) || 
@@ -13,7 +14,27 @@ window['addEventListener']('contextmenu', function (_0xcm) {
 });
 
 let _0x4f12, _0x8a9c, _0x7b8d; 
-const _0x1a2b = 'BrDHsQyhQQE'; // المعرف الجديد الخاص بأغنية طب قصر العيني
+const _0x1a2b = 'BrDHsQyhQQE'; 
+
+// إدارة مظهر الأوضاع (الداكن والساطع)
+const modeBtn = document.getElementById('mode-switcher-btn');
+const themeIcon = document.getElementById('theme-icon');
+const themeText = document.getElementById('theme-text');
+const htmlEl = document.documentElement;
+
+modeBtn.addEventListener('click', () => {
+    if (htmlEl.classList.contains('dark-mode')) {
+        htmlEl.classList.remove('dark-mode');
+        htmlEl.classList.add('light-mode');
+        themeIcon.innerText = '🌙';
+        themeText.innerText = 'الوضع الداكن';
+    } else {
+        htmlEl.classList.remove('light-mode');
+        htmlEl.classList.add('dark-mode');
+        themeIcon.innerText = '☀️';
+        themeText.innerText = 'الوضع الساطع';
+    }
+});
 
 function onYouTubeIframeAPIReady() {
     _0x4f12 = new YT['Player']('youtube-player', {
@@ -33,7 +54,9 @@ function _0x5c2d(_0x7f1a) {
           _0x33ef = document['getElementById']('fullscreen-btn'),
           _0x44fa = document['getElementById']('main-player-container'),
           _0x55bc = document['getElementById']('progress-timeline'),
-          _0x66de = document['getElementById']('vid-mask');
+          _0x66de = document['getElementById']('vid-mask'),
+          _customPoster = document['getElementById']('custom-poster'),
+          _imgTrigger = document['getElementById']('img-start-trigger');
 
     const _0x82cc = () => {
         _0x44fa['classList']['remove']('hide-controls');
@@ -59,6 +82,7 @@ function _0x5c2d(_0x7f1a) {
         } else {
             _0x4f12['playVideo'](); 
             _0x11ab['innerText'] = 'إيقاف مؤقت';
+            _customPoster['classList']['add']('video-started'); // إخفاء واجهة البوستر المخصصة والبدء فوراً
             _0x98bc();
             _0x82cc();
         }
@@ -66,6 +90,8 @@ function _0x5c2d(_0x7f1a) {
 
     _0x11ab['addEventListener']('click', _0x77ef);
     _0x66de['addEventListener']('click', _0x77ef);
+    _imgTrigger['addEventListener']('click', _0x77ef);
+    _customPoster['addEventListener']('click', _0x77ef);
 
     _0x22cd['addEventListener']('click', () => {
         if (_0x4f12['isMuted']()) {
@@ -117,6 +143,7 @@ function _0x3b9a(_0x55aa) {
         clearInterval(_0x8a9c);
         document['getElementById']('main-player-container')['classList']['remove']('hide-controls');
         document['getElementById']('progress-current')['style']['width'] = '0%';
+        document['getElementById']('custom-poster')['classList']['remove']('video-started');
     } else if (_0x55aa['data'] === YT['PlayerState']['PLAYING']) {
         _0x98bc();
     }
