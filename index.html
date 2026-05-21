@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>أغنية تخرج دفعة 2019 طب قصر العيني</title>
+    <title>7lbsaa Player | مشغل الحوت الاحترافي</title>
+    <!-- استدعاء مكتبة الأيقونات الاحترافية Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* نظام الألوان المتغير للوضع الداكن والساطع */
         :root {
             --bg-gradient: linear-gradient(135deg, #0f0c1b, #201a30, #0f0c1b);
             --panel-bg: rgba(255, 255, 255, 0.06);
@@ -54,7 +55,6 @@
             overflow: hidden;
         }
 
-        /* زر تغيير الوضع (داكن/ساطع) في الأعلى */
         .theme-toggle-container {
             position: absolute;
             top: 20px;
@@ -85,9 +85,9 @@
         }
 
         .video-title {
-            font-size: 26px;
+            font-size: 24px;
             font-weight: 800;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
             text-align: center;
             line-height: 1.5;
             max-width: 85%;
@@ -113,7 +113,6 @@
             cursor: none;
         }
 
-        /* حجب يوتيوب بشكل آمن ومحكم */
         .iframe-wrapper {
             position: absolute;
             top: -12%; 
@@ -129,7 +128,6 @@
             border: none;
         }
 
-        /* غطاء الحماية الكلي للفيديو */
         .video-overlay {
             position: absolute;
             top: 0;
@@ -141,7 +139,6 @@
             cursor: pointer;
         }
 
-        /* واجهة التشغيل البديلة (صورة play.png المخصصة) */
         .custom-poster-cover {
             position: absolute;
             top: 0;
@@ -178,7 +175,6 @@
             filter: drop-shadow(0 0 15px var(--accent-glow)) drop-shadow(0 10px 20px rgba(0,0,0,0.5));
         }
 
-        /* شريط التحكم الزجاجي المطور */
         .custom-controls {
             position: absolute;
             bottom: 0;
@@ -192,7 +188,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 25px;
+            padding: 0 20px;
             box-sizing: border-box;
             z-index: 20;
             transition: opacity 0.3s ease, transform 0.3s ease;
@@ -209,18 +205,62 @@
         .controls-right, .controls-left {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 10px;
+        }
+
+        /* حاوية الصوت الذكية (يظهر المؤشر عند الاقتراب أو اللمس) */
+        .volume-container {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            position: relative;
+        }
+
+        .volume-slider-wrapper {
+            width: 0px;
+            overflow: hidden;
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            height: 20px;
+            direction: ltr !important;
+        }
+
+        .volume-container:hover .volume-slider-wrapper,
+        .volume-container:focus-within .volume-slider-wrapper,
+        .volume-container.active .volume-slider-wrapper {
+            width: 70px;
+            margin-left: 5px;
+        }
+
+        .volume-slider {
+            width: 100%;
+            height: 5px;
+            background: var(--control-btn-bg);
+            border-radius: 5px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .volume-filled {
+            height: 100%;
+            background: var(--accent-color);
+            width: 100%;
+            border-radius: 5px;
         }
 
         .control-btn {
             background: var(--control-btn-bg);
             border: 1px solid var(--panel-border);
             color: var(--text-main);
-            font-size: 14px;
-            font-weight: 600;
-            padding: 8px 18px;
-            border-radius: 10px;
+            font-size: 15px;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             transition: all 0.2s ease;
         }
 
@@ -231,10 +271,9 @@
             box-shadow: 0 0 15px var(--accent-glow);
         }
 
-        /* شريط التقدم الاحترافي الزاهي */
         .progress-container {
             flex-grow: 1;
-            margin: 0 25px;
+            margin: 0 15px;
             display: flex;
             align-items: center;
             position: relative;
@@ -282,11 +321,49 @@
         .progress-container:hover .progress-filled::after {
             transform: translateY(-50%) scale(1);
         }
+
+        /* تنسيق القوائم المنبثقة للجودة والسرعة داخل أزرار التحكم */
+        .dropdown-menu-panel {
+            position: absolute;
+            bottom: 55px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(15, 12, 27, 0.95);
+            border: 1px solid var(--panel-border);
+            border-radius: 10px;
+            display: none;
+            flex-direction: column;
+            padding: 6px;
+            z-index: 100;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            min-width: 90px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .dropdown-menu-panel button {
+            background: none;
+            border: none;
+            color: #fff;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 13px;
+            text-align: center;
+            border-radius: 6px;
+            font-family: inherit;
+            white-space: nowrap;
+            transition: background 0.2s ease;
+        }
+
+        .dropdown-menu-panel button:hover {
+            background: var(--accent-color);
+            color: #000;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
-<!-- زر التحكم في الوضع الداكن والساطع -->
 <div class="theme-toggle-container">
     <button class="theme-btn" id="mode-switcher-btn">
         <span id="theme-icon">☀️</span> <span id="theme-text">الوضع الساطع</span>
@@ -297,33 +374,50 @@
 
 <div class="player-container" id="main-player-container">
     
-    <!-- واجهة البوستر المخصصة التي تستبدل شعار يوتيوب العلوي بـ play.png -->
+    <!-- بوستر تشغيل الفيديو المخصص قبل البدء -->
     <div class="custom-poster-cover" id="custom-poster">
         <img src="play.png" alt="Play" class="play-image-trigger" id="img-start-trigger" />
     </div>
 
+    <!-- طبقة الحماية الشفافة فوق الفيديو لمنع التفاعل المباشر مع يوتيوب ولتلقي النقرات -->
     <div class="video-overlay" id="vid-mask"></div>
     
     <div class="iframe-wrapper">
         <div id="youtube-player"></div>
     </div>
     
+    <!-- شريط التحكم الاحترافي السفلي -->
     <div class="custom-controls" id="controls-panel">
         <div class="controls-right">
-            <button class="control-btn" id="play-pause-btn">تشغيل</button>
-            <button class="control-btn" id="mute-btn">كتم الصوت</button>
+            <!-- زر التشغيل والإيقاف المؤقت -->
+            <button class="control-btn" id="play-pause-btn"><i class="fas fa-play"></i></button>
+            
+            <!-- حاوية الصوت المتمددة سحابياً -->
+            <div class="volume-container" id="vol-zone">
+                <button class="control-btn" id="mute-btn"><i class="fas fa-volume-up"></i></button>
+                <div class="volume-slider-wrapper">
+                    <div class="volume-slider" id="volume-timeline">
+                        <div class="volume-filled" id="volume-current"></div>
+                    </div>
+                </div>
+            </div>
         </div>
+        
+        <!-- خط التقدم الزمني لمشاهدة الفيديو -->
         <div class="progress-container" id="progress-timeline">
             <div class="progress-bar">
                 <div class="progress-filled" id="progress-current"></div>
             </div>
         </div>
+        
+        <!-- سيتم حقن أزرار الجودة وسرعة التشغيل هنا برمجياً بجانب زر ملء الشاشة -->
         <div class="controls-left">
-            <button class="control-btn" id="fullscreen-btn">ملء الشاشة ⛶</button>
+            <button class="control-btn" id="fullscreen-btn"><i class="fas fa-expand"></i></button>
         </div>
     </div>
 </div>
 
+<!-- استدعاء ملفات الـ API والجافا سكريبت الخارجية والداخلية المحدثة -->
 <script src="https://www.youtube.com/iframe_api"></script>
 <script src="secure-player.js"></script>
 
