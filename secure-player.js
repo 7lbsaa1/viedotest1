@@ -1,12 +1,12 @@
 let player;
 let isMuted = false;
 let controlsTimeout;
-let lastTap = 0; // لحساب النقر المزدوج
+let lastTap = 0; 
 
-// 1. تهيئة مشغل YouTube وتخصيصه بالكامل ليكون مخفياً ومحمياً
+// تهيئة مشغل YouTube بالـ ID الصحيح لأغنية التخرج
 function onYouTubeIframeAPIReady() {
     player = new YT.Player('youtube-player', {
-        videoId: 'b4N_R-V6wI8', // تأكد من وضع الـ ID الصحيح للفيديو هنا
+        videoId: 'BrDHsQyhQQE', // تم تعديل المعرف للـ ID الصحيح للأغنية
         playerVars: {
             'autoplay': 0,
             'controls': 0,
@@ -25,7 +25,6 @@ function onYouTubeIframeAPIReady() {
     });
 }
 
-// عناصر التحكم من واجهة الـ DOM
 const mainContainer = document.getElementById('main-player-container');
 const customPoster = document.getElementById('custom-poster');
 const vidMask = document.getElementById('vid-mask');
@@ -36,15 +35,12 @@ const progressTimeline = document.getElementById('progress-timeline');
 const progressCurrent = document.getElementById('progress-current');
 const fullscreenBtn = document.getElementById('fullscreen-btn');
 
-// شريط الصوت الذكي
 const volumeZone = document.getElementById('vol-zone');
 const volumeTimeline = document.getElementById('volume-timeline');
 const volumeCurrent = document.getElementById('volume-current');
-
-// إضافة أزرار السرعة والجودة ديناميكياً لتوفير مساحة منسقة
 const controlsLeft = document.querySelector('.controls-left');
 
-// إنشاء زر وقائمة السرعة
+// إنشاء قائمة السرعة ديناميكياً
 const speedBtn = document.createElement('button');
 speedBtn.className = 'control-btn';
 speedBtn.innerHTML = '<i class="fas fa-gauge-high"></i>';
@@ -52,13 +48,11 @@ speedBtn.title = "سرعة التشغيل";
 speedBtn.style.position = 'relative';
 
 const speedMenu = document.createElement('div');
-speedMenu.style.cssText = "position:absolute; bottom:55px; left:0; background:rgba(20,20,30,0.95); border:1px solid var(--panel-border); border-radius:8px; display:none; flex-direction:column; padding:5px; z-index:100; backdrop-filter:blur(10px); min-width:70px;";
-[0.5, 1, 1.5, 2].forEach(speed => {
+speedMenu.className = 'dropdown-menu-panel';
+
+[0.5, 0.75, 1, 1.25, 1.5, 2].forEach(speed => {
     const opt = document.createElement('button');
     opt.innerText = speed === 1 ? 'عادي' : speed + 'x';
-    opt.style.cssText = "background:none; border:none; color:#fff; padding:6px; cursor:pointer; font-size:12px; text-align:center; border-radius:4px;";
-    opt.onmouseover = () => opt.style.background = 'var(--accent-color)';
-    opt.onmouseout = () => opt.style.background = 'none';
     opt.onclick = (e) => {
         e.stopPropagation();
         player.setPlaybackRate(speed);
@@ -69,12 +63,12 @@ speedMenu.style.cssText = "position:absolute; bottom:55px; left:0; background:rg
 speedBtn.appendChild(speedMenu);
 speedBtn.onclick = (e) => {
     e.stopPropagation();
-    qualityMenu.style.display = 'none';
-    speedMenu.style.display = speedMenu.style.display === 'none' ? 'flex' : 'none';
+    qualityMenu.style.display = 'none'; 
+    speedMenu.style.display = speedMenu.style.display === 'flex' ? 'none' : 'flex';
 };
 controlsLeft.insertBefore(speedBtn, fullscreenBtn);
 
-// إنشاء زر وقائمة الجودة
+// إنشاء قائمة الجودة ديناميكياً
 const qualityBtn = document.createElement('button');
 qualityBtn.className = 'control-btn';
 qualityBtn.innerHTML = '<i class="fas fa-sliders"></i>';
@@ -82,29 +76,27 @@ qualityBtn.title = "الجودة";
 qualityBtn.style.position = 'relative';
 
 const qualityMenu = document.createElement('div');
-qualityMenu.style.cssText = "position:absolute; bottom:55px; left:0; background:rgba(20,20,30,0.95); border:1px solid var(--panel-border); border-radius:8px; display:none; flex-direction:column; padding:5px; z-index:100; backdrop-filter:blur(10px); min-width:80px;";
+qualityMenu.className = 'dropdown-menu-panel';
 qualityBtn.appendChild(qualityMenu);
 
 qualityBtn.onclick = (e) => {
     e.stopPropagation();
-    speedMenu.style.display = 'none';
-    if(qualityMenu.style.display === 'none') {
+    speedMenu.style.display = 'none'; 
+    if(qualityMenu.style.display === 'flex') {
+        qualityMenu.style.display = 'none';
+    } else {
         buildQualityMenu();
         qualityMenu.style.display = 'flex';
-    } else {
-        qualityMenu.style.display = 'none';
     }
 };
 controlsLeft.insertBefore(qualityBtn, fullscreenBtn);
 
-// دالة لبناء خيارات الجودة المتاحة للفيديو الحالي بشكل ديناميكي
 function buildQualityMenu() {
     qualityMenu.innerHTML = '';
     const levels = player.getAvailableQualityLevels();
     if(levels && levels.length > 0) {
         levels.forEach(level => {
             const opt = document.createElement('button');
-            // تحسين المسميات لتكون مفهومة للمستخدم
             let label = level;
             if(level === 'hd1080') label = '1080p HD';
             if(level === 'hd720') label = '720p HD';
@@ -115,9 +107,6 @@ function buildQualityMenu() {
             if(level === 'default') label = 'تلقائي';
 
             opt.innerText = label;
-            opt.style.cssText = "background:none; border:none; color:#fff; padding:6px; cursor:pointer; font-size:12px; text-align:center; border-radius:4px;";
-            opt.onmouseover = () => opt.style.background = 'var(--accent-color)';
-            opt.onmouseout = () => opt.style.background = 'none';
             opt.onclick = (e) => {
                 e.stopPropagation();
                 player.setPlaybackQuality(level);
@@ -126,29 +115,25 @@ function buildQualityMenu() {
             qualityMenu.appendChild(opt);
         });
     } else {
-        qualityMenu.innerHTML = '<span style="color:#aaa; font-size:11px; padding:5px;">تلقائي فقط</span>';
+        qualityMenu.innerHTML = '<button style="color:#aaa; cursor:default;">تلقائي فقط</button>';
     }
 }
 
-// إغلاق القوائم المنبثقة عند الضغط في أي مكان خارجها
 document.addEventListener('click', () => {
     speedMenu.style.display = 'none';
     qualityMenu.style.display = 'none';
 });
 
 function onPlayerReady() {
-    // تحديث شريط التقدم الزمني بشكل دوري ومستمر
     setInterval(updateProgress, 200);
 }
 
-// تشغيل وإيقاف البوستر الرئيسي للفيديو
 document.getElementById('img-start-trigger').addEventListener('click', () => {
     customPoster.classList.add('video-started');
     player.playVideo();
     playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
 });
 
-// وظيفة الزر الموحد للتشغيل والإيقاف المؤقت بالأيقونات
 playPauseBtn.addEventListener('click', togglePlay);
 vidMask.addEventListener('click', togglePlay);
 
@@ -172,7 +157,6 @@ function onPlayerStateChange(event) {
     }
 }
 
-// تحديث شريط التقدم الزمني للمشاهدة
 function updateProgress() {
     if (player && player.getDuration) {
         const duration = player.getDuration();
@@ -184,7 +168,6 @@ function updateProgress() {
     }
 }
 
-// تقديم وترجيع الفيديو بالضغط على الشريط الزمني
 progressTimeline.addEventListener('click', (e) => {
     const rect = progressTimeline.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
@@ -196,7 +179,6 @@ progressTimeline.addEventListener('click', (e) => {
     }
 });
 
-// التحكم الذكي في الصوت (كتم / إلغاء الكتم)
 muteBtn.addEventListener('click', () => {
     if (isMuted) {
         player.unMute();
@@ -210,7 +192,6 @@ muteBtn.addEventListener('click', () => {
     isMuted = !isMuted;
 });
 
-// برمجة شريط التمرير ومؤشر الصوت عند السحب بالماوس أو اللمس
 function setVolumeFromEvent(e) {
     const rect = volumeTimeline.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
@@ -235,7 +216,6 @@ function setVolumeFromEvent(e) {
 
 volumeTimeline.addEventListener('click', setVolumeFromEvent);
 
-// دعم السحب المباشر للصوت (Drag) ليعمل مثل التطبيقات العالمية
 let isDraggingVolume = false;
 volumeTimeline.addEventListener('mousedown', () => isDraggingVolume = true);
 document.addEventListener('mouseup', () => isDraggingVolume = false);
@@ -243,19 +223,13 @@ document.addEventListener('mousemove', (e) => {
     if (isDraggingVolume) setVolumeFromEvent(e);
 });
 
-// إضافة تأثير الكلمس على الهواتف لإظهار شريط الصوت وثباته أثناء اللمس
 volumeZone.addEventListener('touchstart', () => volumeZone.classList.add('active'));
 document.addEventListener('touchend', () => volumeZone.classList.remove('active'));
 
-
-// -----------------------------------------------------------------
-// ميزة النقر المزدوج (Double Click) لتكبير وتصغير الشاشة تلقائياً
-// -----------------------------------------------------------------
 vidMask.addEventListener('click', (e) => {
     const currentTime = new Date().getTime();
     const tapLength = currentTime - lastTap;
     if (tapLength < 300 && tapLength > 0) {
-        // تم النقر مرتين! تنفيذ ملء الشاشة
         toggleFullscreen();
         e.preventDefault();
     }
@@ -267,14 +241,13 @@ fullscreenBtn.addEventListener('click', toggleFullscreen);
 function toggleFullscreen() {
     if (!document.fullscreenElement) {
         mainContainer.requestFullscreen().catch(err => {
-            alert(`خطأ أثناء تفعيل ملء الشاشة: ${err.message}`);
+            alert(`خطأ في ملء الشاشة: ${err.message}`);
         });
     } else {
         document.exitFullscreen();
     }
 }
 
-// إخفاء وإظهار شريط التحكم الاحترافي بناءً على حركة المستخدم
 function showControls() {
     mainContainer.classList.remove('hide-controls');
     clearTimeout(controlsTimeout);
@@ -285,17 +258,12 @@ function showControls() {
             speedMenu.style.display = 'none';
             qualityMenu.style.display = 'none';
         }
-    }, 3000); // تختفي بعد 3 ثوانٍ من التوقف عن الحركة
+    }, 3000); 
 }
 
-// تفعيل استماع حركة مؤشر الفأرة واللمس لإظهار شريط التحكم
 mainContainer.addEventListener('mousemove', showControls);
 mainContainer.addEventListener('touchstart', showControls);
 
-
-// -----------------------------------------------------------------
-// نظام تبديل المظهر المحمي (Dark / Light Mode)
-// -----------------------------------------------------------------
 const modeSwitcherBtn = document.getElementById('mode-switcher-btn');
 const themeIcon = document.getElementById('theme-icon');
 const themeText = document.getElementById('theme-text');
