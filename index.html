@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>أغنية تخرج دفعة 2019 طب قصر العيني</title>
+    <style>
+        * {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        body {
+            background: linear-gradient(135deg, rgba(10,10,10,0.96), rgba(25,25,25,0.93)), url('back.jpg') no-repeat center center fixed;
+            background-size: cover;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        .video-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 25px;
+            text-align: center;
+            line-height: 1.4;
+            max-width: 90%;
+            text-shadow: 0 4px 12px rgba(0,0,0,0.9);
+        }
+
+        .player-container {
+            position: relative;
+            width: 92%;
+            max-width: 840px;
+            aspect-ratio: 16 / 9;
+            background-color: #000;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.95);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .player-container.hide-controls {
+            cursor: none;
+        }
+
+        .iframe-wrapper {
+            position: absolute;
+            top: -11%; 
+            left: 0;
+            width: 100%;
+            height: 122%;
+            pointer-events: none;
+        }
+
+        #youtube-player {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .video-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.001);
+            z-index: 10;
+            cursor: pointer;
+        }
+
+        .custom-controls {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background: linear-gradient(transparent, rgba(12,12,12,0.98));
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            box-sizing: border-box;
+            z-index: 20;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .player-container.hide-controls .custom-controls {
+            opacity: 0;
+            transform: translateY(12px);
+            pointer-events: none;
+        }
+
+        .controls-right, .controls-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .control-btn {
+            background: rgba(255, 255, 255, 0.07);
+            border: none;
+            color: #fff;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 7px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .control-btn:hover {
+            background: #00adb5;
+            box-shadow: 0 0 10px rgba(0, 173, 181, 0.5);
+        }
+
+        .progress-container {
+            flex-grow: 1;
+            margin: 0 20px;
+            display: flex;
+            align-items: center;
+            position: relative;
+            cursor: pointer;
+            height: 15px;
+            direction: ltr !important;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            position: relative;
+            transition: height 0.15s ease;
+        }
+
+        .progress-container:hover .progress-bar {
+            height: 7px;
+        }
+
+        .progress-filled {
+            height: 100%;
+            background: #00adb5;
+            width: 0%;
+            border-radius: 6px;
+            position: relative;
+        }
+
+        .progress-filled::after {
+            content: '';
+            position: absolute;
+            left: unset;
+            right: -5px;
+            top: 50%;
+            transform: translateY(-50%) scale(0);
+            width: 10px;
+            height: 10px;
+            background: #fff;
+            border-radius: 50%;
+            transition: transform 0.15s ease;
+        }
+
+        .progress-container:hover .progress-filled::after {
+            transform: translateY(-50%) scale(1);
+        }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+
+<div class="video-title">أغنية تخرج دفعة 2019 طب قصر العيني جامعة القاهرة</div>
+
+<div class="player-container" id="main-player-container">
+    <div class="video-overlay" id="vid-mask"></div>
+    <div class="iframe-wrapper">
+        <div id="youtube-player"></div>
+    </div>
+    <div class="custom-controls" id="controls-panel">
+        <div class="controls-right">
+            <button class="control-btn" id="play-pause-btn">تشغيل</button>
+            <button class="control-btn" id="mute-btn">كتم الصوت</button>
+        </div>
+        <div class="progress-container" id="progress-timeline">
+            <div class="progress-bar">
+                <div class="progress-filled" id="progress-current"></div>
+            </div>
+        </div>
+        <div class="controls-left">
+            <button class="control-btn" id="fullscreen-btn">ملء الشاشة ⛶</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://www.youtube.com/iframe_api"></script>
+<script src="secure-player.js"></script>
+
+</body>
+</html>
