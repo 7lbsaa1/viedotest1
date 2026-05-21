@@ -1,283 +1,150 @@
-let player;
-let isMuted = false;
-let controlsTimeout;
-let lastTap = 0; 
-
-// تهيئة مشغل YouTube بالـ ID الصحيح لأغنية التخرج
-function onYouTubeIframeAPIReady() {
-    player = new YT.Player('youtube-player', {
-        videoId: 'BrDHsQyhQQE', // تم تعديل المعرف للـ ID الصحيح للأغنية
-        playerVars: {
-            'autoplay': 0,
-            'controls': 0,
-            'rel': 0,
-            'showinfo': 0,
-            'modestbranding': 1,
-            'iv_load_policy': 3,
-            'disablekb': 1,
-            'fs': 0,
-            'playsinline': 1
-        },
-        events: {
-            'onReady': onPlayerReady,
-            'onStateChange': onPlayerStateChange
-        }
-    });
-}
-
-const mainContainer = document.getElementById('main-player-container');
-const customPoster = document.getElementById('custom-poster');
-const vidMask = document.getElementById('vid-mask');
-const controlsPanel = document.getElementById('controls-panel');
-const playPauseBtn = document.getElementById('play-pause-btn');
-const muteBtn = document.getElementById('mute-btn');
-const progressTimeline = document.getElementById('progress-timeline');
-const progressCurrent = document.getElementById('progress-current');
-const fullscreenBtn = document.getElementById('fullscreen-btn');
-
-const volumeZone = document.getElementById('vol-zone');
-const volumeTimeline = document.getElementById('volume-timeline');
-const volumeCurrent = document.getElementById('volume-current');
-const controlsLeft = document.querySelector('.controls-left');
-
-// إنشاء قائمة السرعة ديناميكياً
-const speedBtn = document.createElement('button');
-speedBtn.className = 'control-btn';
-speedBtn.innerHTML = '<i class="fas fa-gauge-high"></i>';
-speedBtn.title = "سرعة التشغيل";
-speedBtn.style.position = 'relative';
-
-const speedMenu = document.createElement('div');
-speedMenu.className = 'dropdown-menu-panel';
-
-[0.5, 0.75, 1, 1.25, 1.5, 2].forEach(speed => {
-    const opt = document.createElement('button');
-    opt.innerText = speed === 1 ? 'عادي' : speed + 'x';
-    opt.onclick = (e) => {
-        e.stopPropagation();
-        player.setPlaybackRate(speed);
-        speedMenu.style.display = 'none';
-    };
-    speedMenu.appendChild(opt);
-});
-speedBtn.appendChild(speedMenu);
-speedBtn.onclick = (e) => {
-    e.stopPropagation();
-    qualityMenu.style.display = 'none'; 
-    speedMenu.style.display = speedMenu.style.display === 'flex' ? 'none' : 'flex';
-};
-controlsLeft.insertBefore(speedBtn, fullscreenBtn);
-
-// إنشاء قائمة الجودة ديناميكياً
-const qualityBtn = document.createElement('button');
-qualityBtn.className = 'control-btn';
-qualityBtn.innerHTML = '<i class="fas fa-sliders"></i>';
-qualityBtn.title = "الجودة";
-qualityBtn.style.position = 'relative';
-
-const qualityMenu = document.createElement('div');
-qualityMenu.className = 'dropdown-menu-panel';
-qualityBtn.appendChild(qualityMenu);
-
-qualityBtn.onclick = (e) => {
-    e.stopPropagation();
-    speedMenu.style.display = 'none'; 
-    if(qualityMenu.style.display === 'flex') {
-        qualityMenu.style.display = 'none';
-    } else {
-        buildQualityMenu();
-        qualityMenu.style.display = 'flex';
-    }
-};
-controlsLeft.insertBefore(qualityBtn, fullscreenBtn);
-
-function buildQualityMenu() {
-    qualityMenu.innerHTML = '';
-    const levels = player.getAvailableQualityLevels();
-    if(levels && levels.length > 0) {
-        levels.forEach(level => {
-            const opt = document.createElement('button');
-            let label = level;
-            if(level === 'hd1080') label = '1080p HD';
-            if(level === 'hd720') label = '720p HD';
-            if(level === 'large') label = '480p';
-            if(level === 'medium') label = '360p';
-            if(level === 'small') label = '240p';
-            if(level === 'tiny') label = '144p';
-            if(level === 'default') label = 'تلقائي';
-
-            opt.innerText = label;
-            opt.onclick = (e) => {
-                e.stopPropagation();
-                player.setPlaybackQuality(level);
-                qualityMenu.style.display = 'none';
-            };
-            qualityMenu.appendChild(opt);
-        });
-    } else {
-        qualityMenu.innerHTML = '<button style="color:#aaa; cursor:default;">تلقائي فقط</button>';
-    }
-}
-
-document.addEventListener('click', () => {
-    speedMenu.style.display = 'none';
-    qualityMenu.style.display = 'none';
-});
-
-function onPlayerReady() {
-    setInterval(updateProgress, 200);
-}
-
-document.getElementById('img-start-trigger').addEventListener('click', () => {
-    customPoster.classList.add('video-started');
-    player.playVideo();
-    playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
-});
-
-playPauseBtn.addEventListener('click', togglePlay);
-vidMask.addEventListener('click', togglePlay);
-
-function togglePlay() {
-    const state = player.getPlayerState();
-    if (state === YT.PlayerState.PLAYING) {
-        player.pauseVideo();
-        playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
-    } else {
-        customPoster.classList.add('video-started');
-        player.playVideo();
-        playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
-    }
-}
-
-function onPlayerStateChange(event) {
-    if (event.data === YT.PlayerState.PLAYING) {
-        playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
-    } else if (event.data === YT.PlayerState.PAUSED) {
-        playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
-    }
-}
-
-function updateProgress() {
-    if (player && player.getDuration) {
-        const duration = player.getDuration();
-        const currentTime = player.getCurrentTime();
-        if (duration > 0) {
-            const percentage = (currentTime / duration) * 100;
-            progressCurrent.style.width = percentage + '%';
-        }
-    }
-}
-
-progressTimeline.addEventListener('click', (e) => {
-    const rect = progressTimeline.getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
-    const width = rect.width;
-    const percentage = clickX / width;
-    const duration = player.getDuration();
-    if (duration > 0) {
-        player.seekTo(duration * percentage, true);
+// حماية من الفحص والأزرار الجانبية
+window['addEventListener']('keydown', function (_0xkb) {
+    if (_0xkb['keyCode'] === 0x7B || 
+        (_0xkb['ctrlKey'] && _0xkb['shiftKey'] && (_0xkb['keyCode'] === 0x49 || _0xkb['keyCode'] === 0x4A)) || 
+        (_0xkb['ctrlKey'] && _0xkb['keyCode'] === 0x55)) { 
+        _0xkb['preventDefault']();
+        return false;
     }
 });
 
-muteBtn.addEventListener('click', () => {
-    if (isMuted) {
-        player.unMute();
-        muteBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
-        volumeCurrent.style.width = (player.getVolume() || 100) + '%';
-    } else {
-        player.mute();
-        muteBtn.innerHTML = '<i class="fas fa-volume-xmark"></i>';
-        volumeCurrent.style.width = '0%';
-    }
-    isMuted = !isMuted;
+window['addEventListener']('contextmenu', function (_0xcm) {
+    _0xcm['preventDefault']();
+    return false;
 });
 
-function setVolumeFromEvent(e) {
-    const rect = volumeTimeline.getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
-    const width = rect.width;
-    let percentage = clickX / width;
-    if (percentage < 0) percentage = 0;
-    if (percentage > 1) percentage = 1;
-    
-    const volValue = Math.round(percentage * 100);
-    player.setVolume(volValue);
-    volumeCurrent.style.width = volValue + '%';
-    
-    if (volValue === 0) {
-        muteBtn.innerHTML = '<i class="fas fa-volume-xmark"></i>';
-        isMuted = true;
-    } else {
-        player.unMute();
-        muteBtn.innerHTML = volValue > 50 ? '<i class="fas fa-volume-up"></i>' : '<i class="fas fa-volume-low"></i>';
-        isMuted = false;
-    }
-}
+let _0x4f12, _0x8a9c, _0x7b8d; 
+const _0x1a2b = 'BrDHsQyhQQE'; 
 
-volumeTimeline.addEventListener('click', setVolumeFromEvent);
-
-let isDraggingVolume = false;
-volumeTimeline.addEventListener('mousedown', () => isDraggingVolume = true);
-document.addEventListener('mouseup', () => isDraggingVolume = false);
-document.addEventListener('mousemove', (e) => {
-    if (isDraggingVolume) setVolumeFromEvent(e);
-});
-
-volumeZone.addEventListener('touchstart', () => volumeZone.classList.add('active'));
-document.addEventListener('touchend', () => volumeZone.classList.remove('active'));
-
-vidMask.addEventListener('click', (e) => {
-    const currentTime = new Date().getTime();
-    const tapLength = currentTime - lastTap;
-    if (tapLength < 300 && tapLength > 0) {
-        toggleFullscreen();
-        e.preventDefault();
-    }
-    lastTap = currentTime;
-});
-
-fullscreenBtn.addEventListener('click', toggleFullscreen);
-
-function toggleFullscreen() {
-    if (!document.fullscreenElement) {
-        mainContainer.requestFullscreen().catch(err => {
-            alert(`خطأ في ملء الشاشة: ${err.message}`);
-        });
-    } else {
-        document.exitFullscreen();
-    }
-}
-
-function showControls() {
-    mainContainer.classList.remove('hide-controls');
-    clearTimeout(controlsTimeout);
-    controlsTimeout = setTimeout(() => {
-        const state = player.getPlayerState();
-        if (state === YT.PlayerState.PLAYING) {
-            mainContainer.classList.add('hide-controls');
-            speedMenu.style.display = 'none';
-            qualityMenu.style.display = 'none';
-        }
-    }, 3000); 
-}
-
-mainContainer.addEventListener('mousemove', showControls);
-mainContainer.addEventListener('touchstart', showControls);
-
-const modeSwitcherBtn = document.getElementById('mode-switcher-btn');
+// إدارة مظهر الأوضاع (الداكن والساطع)
+const modeBtn = document.getElementById('mode-switcher-btn');
 const themeIcon = document.getElementById('theme-icon');
 const themeText = document.getElementById('theme-text');
+const htmlEl = document.documentElement;
 
-modeSwitcherBtn.addEventListener('click', () => {
-    if (document.documentElement.classList.contains('dark-mode')) {
-        document.documentElement.classList.remove('dark-mode');
-        document.documentElement.classList.add('light-mode');
+modeBtn.addEventListener('click', () => {
+    if (htmlEl.classList.contains('dark-mode')) {
+        htmlEl.classList.remove('dark-mode');
+        htmlEl.classList.add('light-mode');
         themeIcon.innerText = '🌙';
         themeText.innerText = 'الوضع الداكن';
     } else {
-        document.documentElement.classList.remove('light-mode');
-        document.documentElement.classList.add('dark-mode');
+        htmlEl.classList.remove('light-mode');
+        htmlEl.classList.add('dark-mode');
         themeIcon.innerText = '☀️';
         themeText.innerText = 'الوضع الساطع';
     }
 });
+
+function onYouTubeIframeAPIReady() {
+    _0x4f12 = new YT['Player']('youtube-player', {
+        'videoId': _0x1a2b,
+        'playerVars': {
+            'controls': 0x0, 'rel': 0x0, 'modestbranding': 0x1,
+            'iv_load_policy': 0x3, 'disablekb': 0x1, 'fs': 0x0,
+            'autoplay': 0x0, 'showinfo': 0x0, 'origin': window['location']['origin']
+        },
+        'events': { 'onStateChange': _0x3b9a, 'onReady': _0x5c2d }
+    });
+}
+
+function _0x5c2d(_0x7f1a) {
+    const _0x11ab = document['getElementById']('play-pause-btn'),
+          _0x22cd = document['getElementById']('mute-btn'),
+          _0x33ef = document['getElementById']('fullscreen-btn'),
+          _0x44fa = document['getElementById']('main-player-container'),
+          _0x55bc = document['getElementById']('progress-timeline'),
+          _0x66de = document['getElementById']('vid-mask'),
+          _customPoster = document['getElementById']('custom-poster'),
+          _imgTrigger = document['getElementById']('img-start-trigger');
+
+    const _0x82cc = () => {
+        _0x44fa['classList']['remove']('hide-controls');
+        clearTimeout(_0x7b8d);
+        if (_0x4f12 && _0x4f12['getPlayerState']() === 0x1) {
+            _0x7b8d = setTimeout(() => {
+                _0x44fa['classList']['add']('hide-controls');
+            }, 0xbb8);
+        }
+    };
+
+    _0x44fa['addEventListener']('mousemove', _0x82cc);
+    _0x44fa['addEventListener']('touchstart', _0x82cc, {passive: true});
+
+    const _0x77ef = (_0xev) => {
+        if(_0xev) _0xev['preventDefault']();
+        const _0x99ab = _0x4f12['getPlayerState']();
+        if (_0x99ab === 0x1) {
+            _0x4f12['pauseVideo'](); 
+            _0x11ab['innerText'] = 'تشغيل';
+            clearInterval(_0x8a9c);
+            _0x44fa['classList']['remove']('hide-controls');
+        } else {
+            _0x4f12['playVideo'](); 
+            _0x11ab['innerText'] = 'إيقاف مؤقت';
+            _customPoster['classList']['add']('video-started'); // إخفاء واجهة البوستر المخصصة والبدء فوراً
+            _0x98bc();
+            _0x82cc();
+        }
+    };
+
+    _0x11ab['addEventListener']('click', _0x77ef);
+    _0x66de['addEventListener']('click', _0x77ef);
+    _imgTrigger['addEventListener']('click', _0x77ef);
+    _customPoster['addEventListener']('click', _0x77ef);
+
+    _0x22cd['addEventListener']('click', () => {
+        if (_0x4f12['isMuted']()) {
+            _0x4f12['unMute'](); _0x22cd['innerText'] = 'كتم الصوت';
+        } else {
+            _0x4f12['mute'](); _0x22cd['innerText'] = 'تشغيل الصوت';
+        }
+    });
+
+    _0x33ef['addEventListener']('click', () => {
+        if (!document['fullscreenElement']) {
+            if (_0x44fa['requestFullscreen']) { _0x44fa['requestFullscreen'](); }
+            _0x33ef['innerText'] = 'خروج 🗗';
+        } else {
+            if (document['exitFullscreen']) { document['exitFullscreen'](); }
+            _0x33ef['innerText'] = 'ملء الشاشة ⛶';
+        }
+    });
+
+    _0x55bc['addEventListener']('click', (_0xe321) => {
+        const _0xbc12 = _0x55bc['getBoundingClientRect']();
+        const _0xac45 = _0xe321['clientX'] - _0xbc12['left'];
+        const _0xdc78 = _0xbc12['width'];
+        const _0xfc89 = _0x4f12['getDuration']();
+        if (_0xfc89) {
+            const _0x012a = (_0xac45 / _0xdc78) * _0xfc89;
+            _0x4f12['seekTo'](_0x012a, true);
+            _0x192a();
+        }
+    });
+}
+
+function _0x98bc() { _0x8a9c = setInterval(_0x192a, 0x1f4); }
+
+function _0x192a() {
+    if (_0x4f12 && _0x4f12['getCurrentTime']) {
+        const _0x22ff = _0x4f12['getCurrentTime'](),
+              _0x33aa = _0x4f12['getDuration']();
+        if (_0x33aa) {
+            const _0x44bb = (_0x22ff / _0x33aa) * 0x64;
+            document['getElementById']('progress-current')['style']['width'] = _0x44bb + '%';
+        }
+    }
+}
+
+function _0x3b9a(_0x55aa) {
+    if (_0x55aa['data'] === YT['PlayerState']['ENDED']) {
+        document['getElementById']('play-pause-btn')['innerText'] = 'إعادة تشغيل';
+        clearInterval(_0x8a9c);
+        document['getElementById']('main-player-container')['classList']['remove']('hide-controls');
+        document['getElementById']('progress-current')['style']['width'] = '0%';
+        document['getElementById']('custom-poster')['classList']['remove']('video-started');
+    } else if (_0x55aa['data'] === YT['PlayerState']['PLAYING']) {
+        _0x98bc();
+    }
+}
