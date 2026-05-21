@@ -1,66 +1,125 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" class="dark-mode">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>أغنية تخرج دفعة 2019 طب قصر العيني</title>
     <style>
+        /* نظام الألوان المتغير للوضع الداكن والساطع */
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f0c1b, #201a30, #0f0c1b);
+            --panel-bg: rgba(255, 255, 255, 0.06);
+            --panel-border: rgba(255, 255, 255, 0.1);
+            --text-main: #ffffff;
+            --text-sub: #b3b3b3;
+            --accent-color: #00f2fe;
+            --accent-glow: rgba(0, 242, 254, 0.4);
+            --control-btn-bg: rgba(255, 255, 255, 0.1);
+            --control-btn-hover: rgba(255, 255, 255, 0.2);
+            --shadow-color: rgba(0, 0, 0, 0.6);
+        }
+
+        .light-mode {
+            --bg-gradient: linear-gradient(135deg, #f5f7fa, #e4e8f0, #f5f7fa);
+            --panel-bg: rgba(255, 255, 255, 0.65);
+            --panel-border: rgba(0, 0, 0, 0.08);
+            --text-main: #1a1a2e;
+            --text-sub: #555566;
+            --accent-color: #0072ff;
+            --accent-glow: rgba(0, 114, 255, 0.3);
+            --control-btn-bg: rgba(0, 0, 0, 0.05);
+            --control-btn-hover: rgba(0, 0, 0, 0.1);
+            --shadow-color: rgba(0, 0, 0, 0.15);
+        }
+
         * {
+            box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
             -webkit-touch-callout: none;
             -webkit-user-select: none;
-            -khtml-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
             user-select: none;
+            transition: background 0.4s ease, color 0.4s ease, border-color 0.4s ease;
         }
 
         body {
-            background: linear-gradient(135deg, rgba(10,10,10,0.96), rgba(25,25,25,0.93)), url('back.jpg') no-repeat center center fixed;
-            background-size: cover;
+            background: var(--bg-gradient);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
-            font-family: 'Segoe UI', Tahoma, sans-serif;
-            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-main);
             overflow: hidden;
         }
 
+        /* زر تغيير الوضع (داكن/ساطع) في الأعلى */
+        .theme-toggle-container {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+        }
+
+        .theme-btn {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            color: var(--text-main);
+            padding: 10px 18px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 8px 32px var(--shadow-color);
+        }
+
+        .theme-btn:hover {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 12px var(--accent-glow);
+        }
+
         .video-title {
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 25px;
+            font-size: 26px;
+            font-weight: 800;
+            margin-bottom: 30px;
             text-align: center;
-            line-height: 1.4;
-            max-width: 90%;
-            text-shadow: 0 4px 12px rgba(0,0,0,0.9);
+            line-height: 1.5;
+            max-width: 85%;
+            background: linear-gradient(45deg, var(--text-main), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 4px 20px var(--shadow-color);
         }
 
         .player-container {
             position: relative;
-            width: 92%;
-            max-width: 840px;
+            width: 90%;
+            max-width: 880px;
             aspect-ratio: 16 / 9;
             background-color: #000;
-            border-radius: 14px;
+            border-radius: 20px;
             overflow: hidden;
-            box-shadow: 0 25px 60px rgba(0,0,0,0.95);
-            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 0 30px 70px var(--shadow-color);
+            border: 1px solid var(--panel-border);
         }
 
         .player-container.hide-controls {
             cursor: none;
         }
 
+        /* حجب يوتيوب بشكل آمن ومحكم */
         .iframe-wrapper {
             position: absolute;
-            top: -11%; 
+            top: -12%; 
             left: 0;
             width: 100%;
-            height: 122%;
+            height: 124%;
             pointer-events: none;
         }
 
@@ -70,6 +129,7 @@
             border: none;
         }
 
+        /* غطاء الحماية الكلي للفيديو */
         .video-overlay {
             position: absolute;
             top: 0;
@@ -81,19 +141,58 @@
             cursor: pointer;
         }
 
+        /* واجهة التشغيل البديلة (صورة play.png المخصصة) */
+        .custom-poster-cover {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            z-index: 15;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+        }
+
+        .custom-poster-cover.video-started {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .play-image-trigger {
+            width: 90px;
+            height: 90px;
+            object-fit: contain;
+            cursor: pointer;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.3s ease;
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));
+        }
+
+        .custom-poster-cover:hover .play-image-trigger {
+            transform: scale(1.12);
+            filter: drop-shadow(0 0 15px var(--accent-glow)) drop-shadow(0 10px 20px rgba(0,0,0,0.5));
+        }
+
+        /* شريط التحكم الزجاجي المطور */
         .custom-controls {
             position: absolute;
             bottom: 0;
             left: 0;
             width: 100%;
-            height: 60px;
-            background: linear-gradient(transparent, rgba(12,12,12,0.98));
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            height: 70px;
+            background: var(--panel-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid var(--panel-border);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 20px;
+            padding: 0 25px;
             box-sizing: border-box;
             z-index: 20;
             transition: opacity 0.3s ease, transform 0.3s ease;
@@ -103,77 +202,81 @@
 
         .player-container.hide-controls .custom-controls {
             opacity: 0;
-            transform: translateY(12px);
+            transform: translateY(15px);
             pointer-events: none;
         }
 
         .controls-right, .controls-left {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 15px;
         }
 
         .control-btn {
-            background: rgba(255, 255, 255, 0.07);
-            border: none;
-            color: #fff;
-            font-size: 13px;
+            background: var(--control-btn-bg);
+            border: 1px solid var(--panel-border);
+            color: var(--text-main);
+            font-size: 14px;
             font-weight: 600;
-            padding: 7px 15px;
-            border-radius: 6px;
+            padding: 8px 18px;
+            border-radius: 10px;
             cursor: pointer;
             transition: all 0.2s ease;
         }
 
         .control-btn:hover {
-            background: #00adb5;
-            box-shadow: 0 0 10px rgba(0, 173, 181, 0.5);
+            background: var(--accent-color);
+            color: #fff;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 15px var(--accent-glow);
         }
 
+        /* شريط التقدم الاحترافي الزاهي */
         .progress-container {
             flex-grow: 1;
-            margin: 0 20px;
+            margin: 0 25px;
             display: flex;
             align-items: center;
             position: relative;
             cursor: pointer;
-            height: 15px;
+            height: 20px;
             direction: ltr !important;
         }
 
         .progress-bar {
             width: 100%;
-            height: 5px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 6px;
+            height: 6px;
+            background: var(--control-btn-bg);
+            border-radius: 10px;
             position: relative;
-            transition: height 0.15s ease;
+            transition: height 0.2s ease;
         }
 
         .progress-container:hover .progress-bar {
-            height: 7px;
+            height: 8px;
         }
 
         .progress-filled {
             height: 100%;
-            background: #00adb5;
+            background: linear-gradient(90deg, var(--accent-color), #00f2fe);
             width: 0%;
-            border-radius: 6px;
+            border-radius: 10px;
             position: relative;
+            box-shadow: 0 0 10px var(--accent-glow);
         }
 
         .progress-filled::after {
             content: '';
             position: absolute;
-            left: unset;
-            right: -5px;
+            right: -6px;
             top: 50%;
             transform: translateY(-50%) scale(0);
-            width: 10px;
-            height: 10px;
-            background: #fff;
+            width: 12px;
+            height: 12px;
+            background: var(--text-main);
             border-radius: 50%;
-            transition: transform 0.15s ease;
+            box-shadow: 0 0 8px rgba(0,0,0,0.5);
+            transition: transform 0.2s ease;
         }
 
         .progress-container:hover .progress-filled::after {
@@ -183,13 +286,28 @@
 </head>
 <body oncontextmenu="return false;">
 
+<!-- زر التحكم في الوضع الداكن والساطع -->
+<div class="theme-toggle-container">
+    <button class="theme-btn" id="mode-switcher-btn">
+        <span id="theme-icon">☀️</span> <span id="theme-text">الوضع الساطع</span>
+    </button>
+</div>
+
 <div class="video-title">أغنية تخرج دفعة 2019 طب قصر العيني جامعة القاهرة</div>
 
 <div class="player-container" id="main-player-container">
+    
+    <!-- واجهة البوستر المخصصة التي تستبدل شعار يوتيوب العلوي بـ play.png -->
+    <div class="custom-poster-cover" id="custom-poster">
+        <img src="play.png" alt="Play" class="play-image-trigger" id="img-start-trigger" />
+    </div>
+
     <div class="video-overlay" id="vid-mask"></div>
+    
     <div class="iframe-wrapper">
         <div id="youtube-player"></div>
     </div>
+    
     <div class="custom-controls" id="controls-panel">
         <div class="controls-right">
             <button class="control-btn" id="play-pause-btn">تشغيل</button>
